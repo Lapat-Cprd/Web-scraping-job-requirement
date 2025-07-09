@@ -1,0 +1,64 @@
+"""
+⚠️ MOCK PROJECT: This script is for educational purposes only.
+It demonstrates how to use Selenium to scrape job listings from a simulated job board.
+No real data was collected or published.
+"""
+
+import time
+from datetime import datetime
+import csv
+from selenium.webdriver.common.by import By
+from selenium import webdriver
+
+# Setup
+driver = webdriver.Chrome()
+url = 'https://example.com/jobs'  # 🔁 Mock URL
+driver.get(url)
+time.sleep(2)
+
+# Simulate search
+search_input = driver.find_element(By.ID, "search-input")
+search_input.send_keys("Data Analyst")
+search_button = driver.find_element(By.ID, "search-button")
+search_button.click()
+time.sleep(2)
+
+# Simulate scraping job cards
+job_cards = driver.find_elements(By.CLASS_NAME, "job-card")  # 🔁 Mock class
+job_data = []
+
+for index, card in enumerate(job_cards, start=1):
+    try:
+        title = card.find_element(By.CLASS_NAME, "job-title").text
+        company = card.find_element(By.CLASS_NAME, "company-name").text
+        location = card.find_element(By.CLASS_NAME, "job-location").text
+        salary = card.find_element(By.CLASS_NAME, "job-salary").text
+        detail_url = card.find_element(By.TAG_NAME, "a").get_attribute("href")
+
+        job_data.append({
+            "Index": index,
+            "Date_Searched": datetime.today().strftime("%Y-%m-%d"),
+            "Title": title,
+            "Company": company,
+            "Location": location,
+            "Salary": salary,
+            "Detail_URL": detail_url
+        })
+
+        print(f"✅ Collected: {title} at {company}")
+
+    except Exception as e:
+        print(f"❌ Error collecting job card: {e}")
+        continue
+
+driver.quit()
+
+# Save to CSV
+if job_data:
+    with open("mock_job_data.csv", "w", newline="", encoding="utf-8-sig") as f:
+        writer = csv.DictWriter(f, fieldnames=job_data[0].keys())
+        writer.writeheader()
+        writer.writerows(job_data)
+    print(f"📁 Saved {len(job_data)} job listings to mock_job_data.csv")
+else:
+    print("⚠️ No job data found.")
